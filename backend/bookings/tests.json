@@ -1,0 +1,24 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Успешная заявка",
+      "method": "POST",
+      "path": "/",
+      "body": { "name": "Анна", "phone": "+7 999 000 00 00", "service": "Стрижка" },
+      "expectedStatus": 200
+    },
+    {
+      "name": "Заявка без имени — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "phone": "+7 999 000 00 00" },
+      "expectedStatus": 400
+    }
+  ]
+}

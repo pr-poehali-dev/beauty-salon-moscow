@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, FormEvent } from "react";
 import Icon from "@/components/ui/icon";
+
+const BOOKING_URL = "https://functions.poehali.dev/b6fce0a6-3308-4495-bf0a-9e77dbfcb586";
 
 const HERO_IMAGE =
   "https://cdn.poehali.dev/projects/0fe37939-ae10-4d9e-ad02-b0acda00bf71/files/e1aeeec7-3289-4a1f-8162-e1a5d4ad3388.jpg";
@@ -56,6 +58,161 @@ const reviews = [
     rating: 5,
   },
 ];
+
+const serviceOptions = [
+  "Стрижка и укладка",
+  "Окрашивание",
+  "Уход за волосами",
+  "Маникюр и педикюр",
+  "Косметология",
+  "Макияж",
+];
+
+function BookingSection() {
+  const [form, setForm] = useState({ name: "", phone: "", service: "", message: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    try {
+      const res = await fetch(BOOKING_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setStatus("success");
+        setForm({ name: "", phone: "", service: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  const inputStyle = {
+    backgroundColor: "transparent",
+    borderColor: "var(--salon-taupe)",
+    color: "var(--salon-dark)",
+    outline: "none",
+  };
+
+  return (
+    <section id="booking" className="py-24 md:py-32" style={{ backgroundColor: "var(--salon-dark)" }}>
+      <div className="max-w-6xl mx-auto px-6">
+        <AnimatedSection className="text-center mb-16">
+          <p className="font-golos text-xs uppercase mb-4" style={{ color: "var(--salon-gold)", letterSpacing: "0.3em" }}>
+            Онлайн запись
+          </p>
+          <h2 className="font-cormorant text-4xl md:text-5xl font-light" style={{ color: "var(--salon-cream)" }}>
+            Запишитесь к нам
+          </h2>
+          <p className="font-golos text-sm mt-4" style={{ color: "var(--salon-taupe)" }}>
+            Оставьте заявку — мы свяжемся с вами для подтверждения времени
+          </p>
+        </AnimatedSection>
+
+        <AnimatedSection className="max-w-2xl mx-auto">
+          {status === "success" ? (
+            <div className="text-center py-16 border" style={{ borderColor: "var(--salon-taupe)" }}>
+              <div className="w-12 h-12 mx-auto flex items-center justify-center border mb-6" style={{ borderColor: "var(--salon-gold)" }}>
+                <Icon name="Check" size={20} style={{ color: "var(--salon-gold)" }} />
+              </div>
+              <p className="font-cormorant text-2xl font-light mb-2" style={{ color: "var(--salon-cream)" }}>
+                Заявка принята!
+              </p>
+              <p className="font-golos text-sm" style={{ color: "var(--salon-taupe)" }}>
+                Мы позвоним вам для подтверждения записи
+              </p>
+              <button
+                onClick={() => setStatus("idle")}
+                className="mt-8 font-golos text-xs uppercase hover:opacity-70 transition-opacity"
+                style={{ color: "var(--salon-gold)", letterSpacing: "0.15em" }}
+              >
+                Отправить ещё одну заявку
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="font-golos text-xs uppercase" style={{ color: "var(--salon-taupe)", letterSpacing: "0.15em" }}>
+                    Имя *
+                  </label>
+                  <input
+                    required
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    placeholder="Ваше имя"
+                    className="border px-4 py-3 font-golos text-sm"
+                    style={inputStyle}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="font-golos text-xs uppercase" style={{ color: "var(--salon-taupe)", letterSpacing: "0.15em" }}>
+                    Телефон *
+                  </label>
+                  <input
+                    required
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="+7 (___) ___-__-__"
+                    className="border px-4 py-3 font-golos text-sm"
+                    style={inputStyle}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="font-golos text-xs uppercase" style={{ color: "var(--salon-taupe)", letterSpacing: "0.15em" }}>
+                  Услуга
+                </label>
+                <select
+                  value={form.service}
+                  onChange={e => setForm(f => ({ ...f, service: e.target.value }))}
+                  className="border px-4 py-3 font-golos text-sm appearance-none cursor-pointer"
+                  style={{ ...inputStyle, backgroundColor: "var(--salon-dark)" }}
+                >
+                  <option value="">Выберите услугу</option>
+                  {serviceOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="font-golos text-xs uppercase" style={{ color: "var(--salon-taupe)", letterSpacing: "0.15em" }}>
+                  Пожелания
+                </label>
+                <textarea
+                  rows={3}
+                  value={form.message}
+                  onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+                  placeholder="Удобное время, особые пожелания..."
+                  className="border px-4 py-3 font-golos text-sm resize-none"
+                  style={inputStyle}
+                />
+              </div>
+              {status === "error" && (
+                <p className="font-golos text-xs" style={{ color: "#E07070" }}>
+                  Что-то пошло не так. Позвоните нам: +7 (495) 506-32-11
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                className="mt-2 px-10 py-4 font-golos text-xs uppercase transition-opacity hover:opacity-80 disabled:opacity-50"
+                style={{ backgroundColor: "var(--salon-gold)", color: "var(--salon-cream)", letterSpacing: "0.15em" }}
+              >
+                {status === "loading" ? "Отправляем..." : "Отправить заявку"}
+              </button>
+            </form>
+          )}
+        </AnimatedSection>
+      </div>
+    </section>
+  );
+}
 
 function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -387,6 +544,9 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* BOOKING FORM */}
+      <BookingSection />
 
       {/* CONTACTS */}
       <section id="contacts" className="py-24 md:py-32" style={{ backgroundColor: "var(--salon-cream)" }}>
